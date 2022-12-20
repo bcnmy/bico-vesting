@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-progress": "^1.0.1",
+    "@radix-ui/react-toast": "^1.1.2",
     "@web3modal/ethereum": "^2.0.0-beta.9",
     "@web3modal/react": "^2.0.0-beta.9",
     "dayjs": "^1.11.7",
