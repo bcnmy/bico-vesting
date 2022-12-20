@@ -149,9 +149,10 @@ const ConnectedApp = () => {
   }
 
   const isClaimTokensDisabled =
-    claimPaused || totalAmount === amountClaimed || !claim.isActive;
-
-  console.log({ totalAmount, amountClaimed, totalClaimableAmount });
+    claimPaused ||
+    amountClaimed >= totalAmount ||
+    amountClaimed >= totalClaimableAmount ||
+    !claim.isActive;
 
   return (
     <section className={styles.slice}>
