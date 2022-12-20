@@ -6,7 +6,9 @@ import {
   mainnet,
   useAccount,
   useContractRead,
+  useContractWrite,
   useNetwork,
+  usePrepareContractWrite,
   useSwitchNetwork,
 } from 'wagmi';
 import bicoVestingABI from '../../abis/bico-vesting.abi.json';
@@ -26,29 +28,24 @@ type ClaimData = {
   amountClaimed: BigNumber;
 };
 
-const ClaimBicoButton = () => {
-  return <button className="claim-bico--btn">Claim Bico</button>;
-};
-
-const SwitchNetworkButton = () => {
-  const { isLoading, switchNetwork } = useSwitchNetwork();
-
-  return (
-    <button
-      disabled={!switchNetwork}
-      className="claim-bico--btn"
-      onClick={() => switchNetwork?.(mainnet.id)}
-    >
-      {isLoading ? 'Switching...' : 'Switch to Ethereum'}
-    </button>
-  );
-};
-
 const ConnectedApp = () => {
   const { address } = useAccount();
   const { chain } = useNetwork();
+  const { isLoading: switchNetworkLoading, switchNetwork } = useSwitchNetwork();
   // TODO: Use mainnet for prod and goerli for dev.
   const supportedChainIds = [goerli.id, mainnet.id];
+
+  const { config } = usePrepareContractWrite({
+    address: BICO_VESTING_ADDRESS,
+    abi: bicoVestingABI,
+    functionName: 'claim',
+  });
+  const {
+    data: claimBicoData,
+    isLoading: claimBicoLoading,
+    isSuccess: claimBicoSuccess,
+    write,
+  } = useContractWrite(config);
 
   const {
     data: claimData,
@@ -77,9 +74,9 @@ const ConnectedApp = () => {
   const claimableAmount = claimableAmountData as BigNumber;
 
   const {
-    data: claimPaused,
-    isError: claimPausedError,
-    isLoading: claimPausedLoading,
+    data: claimPausedData,
+    isError: claimPausedDataError,
+    isLoading: claimPausedDataLoading,
   } = useContractRead({
     address: BICO_VESTING_ADDRESS,
     abi: bicoVestingABI,
@@ -87,7 +84,11 @@ const ConnectedApp = () => {
     chainId: 5,
   });
 
-  if (claimDataLoading || claimableAmountDataLoading || claimPausedLoading) {
+  if (
+    claimDataLoading ||
+    claimableAmountDataLoading ||
+    claimPausedDataLoading
+  ) {
     return (
       <section className={styles.slice}>
         <p>Loading...</p>;
@@ -112,7 +113,7 @@ const ConnectedApp = () => {
       claim.vestAmount.add(claim.unlockAmount).toString()
     )
   );
-
+  const claimPaused = claimPausedData as boolean;
   const streamedTokens = (totalClaimableAmount / totalAmount) * 100;
   const claimedTokens = (amountClaimed / totalClaimableAmount) * 100;
   const availability = (totalClaimableAmount - amountClaimed).toLocaleString();
@@ -129,14 +130,31 @@ const ConnectedApp = () => {
     maturityStatus = 'Revoked';
   }
 
+  const isClaimTokensDisabled =
+    claimPaused || totalAmount === amountClaimed || !claim.isActive;
+
   return (
     <section className={styles.slice}>
       <header className={styles.sectionHeader}>
         <h1>Claim Tokens</h1>
         {chain && supportedChainIds.includes(chain.id) ? (
-          <ClaimBicoButton />
+          <button
+            disabled={isClaimTokensDisabled || !write}
+            onClick={() => write?.()}
+          >
+            {claimBicoLoading
+              ? 'Claiming...'
+              : claimBicoSuccess
+              ? 'Claimed'
+              : 'Claim Bico'}
+          </button>
         ) : (
-          <SwitchNetworkButton />
+          <button
+            disabled={!switchNetwork}
+            onClick={() => switchNetwork?.(mainnet.id)}
+          >
+            {switchNetworkLoading ? 'Switching...' : 'Switch to Ethereum'}
+          </button>
         )}
       </header>
       <article className={styles.article}>
