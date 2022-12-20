@@ -80,25 +80,7 @@ const ConnectedApp = () => {
     ],
   });
   const data = vestingData as [Claim, BigNumber, boolean];
-  const [claim, claimableAmount, paused] = data;
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <section className={styles.slice}>
-        <p>Loading...</p>;
-      </section>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <section className={styles.slice}>
-        <p>We were unable to fetch the claims data. Please try again later.</p>;
-      </section>
-    );
-  }
+  const [claim, claimableAmount, paused] = data ?? [];
 
   const { config } = usePrepareContractWrite({
     address: VESTING_ADDRESS,
@@ -163,6 +145,24 @@ const ConnectedApp = () => {
         }, 100);
       },
     });
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className={styles.slice}>
+        <p>Loading...</p>;
+      </section>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <section className={styles.slice}>
+        <p>We were unable to fetch the claims data. Please try again later.</p>;
+      </section>
+    );
+  }
 
   // Desctructure claim data
   const {
