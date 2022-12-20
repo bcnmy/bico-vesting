@@ -1,32 +1,29 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import {
   goerli,
   mainnet,
   useAccount,
-  useContractRead,
+  useContractReads,
   useContractWrite,
   useNetwork,
   usePrepareContractWrite,
   useSwitchNetwork,
   useWaitForTransaction,
 } from 'wagmi';
-import bicoVestingABI from '../../abis/bico-vesting.abi.json';
-import { ProgressBar } from '../ProgressBar';
-dayjs.extend(relativeTime);
+import vestingABI from '../../abis/vesting.abi.json';
+import { formatBigNumber } from '../../utils/formatBigNumber';
+import { Claim, formatClaim } from '../../utils/formatClaim';
+import { TokensInfo } from '../TokensInfo';
 import styles from './ConnectedApp.module.css';
+dayjs.extend(relativeTime);
 
-const BICO_VESTING_ADDRESS = '0x483C9102a938D3d1f0bc4dc73bea831A2048D55b';
+const VESTING_ADDRESS = '0x483C9102a938D3d1f0bc4dc73bea831A2048D55b';
 
-type ClaimData = {
-  isActive: boolean;
-  vestAmount: BigNumber;
-  unlockAmount: BigNumber;
-  unlockTime: BigNumber;
-  startTime: BigNumber;
-  endTime: BigNumber;
-  amountClaimed: BigNumber;
+const vestingContract = {
+  address: VESTING_ADDRESS,
+  abi: vestingABI,
 };
 
 const ConnectedApp = () => {
@@ -36,77 +33,37 @@ const ConnectedApp = () => {
   // TODO: Use mainnet for prod and goerli for dev.
   const supportedChainIds = [goerli.id, mainnet.id];
 
-  const { config } = usePrepareContractWrite({
-    address: BICO_VESTING_ADDRESS,
-    abi: bicoVestingABI,
-    functionName: 'claim',
-  });
   const {
-    data: claimBicoData,
-    isLoading: claimBicoLoading,
-    isSuccess: claimBicoSuccess,
-    write,
-  } = useContractWrite(config);
-
-  const {
-    data: claimBicoTransaction,
-    isError: claimBicoTransactionError,
-    isLoading: claimBicoTransactionLoading,
-    isSuccess: claimBicoTransactionSuccess,
-  } = useWaitForTransaction({
-    hash: claimBicoData?.hash,
-    onSuccess: () => {
-      refetchClaimData();
-      refetchClaimableAmountData();
-      refetchClaimPausedData();
-    },
+    data: vestingData,
+    isError,
+    isLoading,
+    refetch,
+  } = useContractReads({
+    contracts: [
+      {
+        ...vestingContract,
+        functionName: 'getClaim',
+        args: [address],
+        chainId: 5,
+      },
+      {
+        ...vestingContract,
+        functionName: 'claimableAmount',
+        args: [address],
+        chainId: 5,
+      },
+      {
+        ...vestingContract,
+        functionName: 'paused',
+        chainId: 5,
+      },
+    ],
   });
+  const data = vestingData as [Claim, BigNumber, boolean];
+  const [claim, claimableAmount, paused] = data;
 
-  const {
-    data: claimData,
-    isError: claimDataError,
-    isLoading: claimDataLoading,
-    refetch: refetchClaimData,
-  } = useContractRead({
-    address: BICO_VESTING_ADDRESS,
-    abi: bicoVestingABI,
-    functionName: 'getClaim',
-    args: [address],
-    chainId: 5,
-  });
-  const claim = claimData as ClaimData;
-
-  const {
-    data: claimableAmountData,
-    isError: claimableAmountDataError,
-    isLoading: claimableAmountDataLoading,
-    refetch: refetchClaimableAmountData,
-  } = useContractRead({
-    address: BICO_VESTING_ADDRESS,
-    abi: bicoVestingABI,
-    functionName: 'claimableAmount',
-    args: [address],
-    chainId: 5,
-  });
-  const claimableAmount = claimableAmountData as BigNumber;
-
-  const {
-    data: claimPausedData,
-    isError: claimPausedDataError,
-    isLoading: claimPausedDataLoading,
-    refetch: refetchClaimPausedData,
-  } = useContractRead({
-    address: BICO_VESTING_ADDRESS,
-    abi: bicoVestingABI,
-    functionName: 'paused',
-    chainId: 5,
-  });
-
-  if (
-    claimDataLoading ||
-    claimableAmountDataLoading ||
-    claimPausedDataLoading
-  ) {
+  // Loading state
+  if (isLoading) {
     return (
       <section className={styles.slice}>
         <p>Loading...</p>;
@@ -114,44 +71,71 @@ const ConnectedApp = () => {
     );
   }
 
-  const amountClaimed = Number.parseFloat(
-    ethers.utils.formatEther(claim.amountClaimed)
-  );
-  const maturityDate = new Date(
-    Number.parseFloat(claim.endTime.toString()) * 1000
-  );
-  const currentDate = Math.round(Date.now() / 1000);
-  const totalClaimableAmount = Number.parseFloat(
-    ethers.utils.formatEther(
-      claimableAmount.add(claim.amountClaimed).toString()
-    )
-  );
-  const totalAmount = Number.parseFloat(
-    ethers.utils.formatEther(
-      claim.vestAmount.add(claim.unlockAmount).toString()
-    )
-  );
-  const claimPaused = claimPausedData as boolean;
-  const streamedTokens = (totalClaimableAmount / totalAmount) * 100;
-  const claimedTokens = (amountClaimed / totalClaimableAmount) * 100;
-  const availability = (totalClaimableAmount - amountClaimed).toLocaleString();
+  // Error state
+  if (isError) {
+    return (
+      <section className={styles.slice}>
+        <p>We were unable to fetch the claims data. Please try again later.</p>;
+      </section>
+    );
+  }
 
+  const { config } = usePrepareContractWrite({
+    address: VESTING_ADDRESS,
+    abi: vestingABI,
+    functionName: 'claim',
+  });
+  const { data: claimTokensData, write } = useContractWrite(config);
+  const {
+    isError: claimTokensTxError,
+    isLoading: claimTokensTxLoading,
+    isSuccess: claimTokensTxSuccess,
+  } = useWaitForTransaction({
+    hash: claimTokensData?.hash,
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Desctructure claim data
+  const {
+    vestAmount,
+    unlockAmount,
+    endTime,
+    amountClaimed: tokensClaimed,
+  } = formatClaim(claim);
+
+  // Current and matury dates
+  const currentDate = Math.round(Date.now() / 1000);
+  const maturityDate = new Date(Number.parseFloat(endTime.toString()) * 1000);
+
+  // Claimable and total claimable tokens
+  const claimableTokens = formatBigNumber(claimableAmount) + tokensClaimed;
+  const totalClaimableTokens = vestAmount + unlockAmount;
+
+  // Generated tokens, claimed tokens and availability
+  const streamedTokens = (claimableTokens / totalClaimableTokens) * 100;
+  const claimedTokens = (tokensClaimed / claimableTokens) * 100;
+  const availability = (claimableTokens - tokensClaimed).toLocaleString();
+
+  // Maturity status
   let maturityStatus = `${dayjs(maturityDate).fromNow(true)} till maturity`;
   if (
     currentDate > Number.parseFloat(claim.endTime.toString()) ||
     !claim.endTime
   ) {
     maturityStatus = 'Complete';
-  } else if (claimPaused) {
+  } else if (paused) {
     maturityStatus = 'Paused';
-  } else if (totalAmount !== amountClaimed && !claim.isActive) {
+  } else if (totalClaimableTokens !== tokensClaimed && !claim.isActive) {
     maturityStatus = 'Revoked';
   }
 
-  const isClaimTokensDisabled =
-    claimPaused ||
-    amountClaimed >= totalAmount ||
-    amountClaimed >= totalClaimableAmount ||
+  // Is claim exhausted?
+  const areClaimsDisabled =
+    paused ||
+    tokensClaimed >= totalClaimableTokens ||
+    tokensClaimed >= claimableTokens ||
     !claim.isActive;
 
   return (
@@ -160,12 +144,13 @@ const ConnectedApp = () => {
         <h1>Claim Tokens</h1>
         {chain && supportedChainIds.includes(chain.id) ? (
           <button
-            disabled={isClaimTokensDisabled || !write}
+            className={styles.claimTokensBtn}
+            disabled={areClaimsDisabled || !write}
             onClick={() => write?.()}
           >
-            {claimBicoTransactionLoading
+            {claimTokensTxLoading
               ? 'Claiming...'
-              : claimBicoTransactionSuccess
+              : claimTokensTxSuccess
               ? 'Claimed'
               : 'Claim Bico'}
           </button>
@@ -178,33 +163,16 @@ const ConnectedApp = () => {
           </button>
         )}
       </header>
-      <article className={styles.article}>
-        <h2>Streamed</h2>
-        <ProgressBar value={streamedTokens} aria-label="Streamed tokens" />
-        <p>
-          {totalClaimableAmount.toLocaleString()} /{' '}
-          {totalAmount.toLocaleString()} total tokens
-        </p>
-      </article>
 
-      <article className={styles.article}>
-        <h2>Claimed</h2>
-        <ProgressBar value={claimedTokens} aria-label="Claimed tokens" />
-        <p>
-          {amountClaimed.toLocaleString()} /{' '}
-          {totalClaimableAmount.toLocaleString()} tokens claimed
-        </p>
-      </article>
-
-      <article className={styles.article}>
-        <h2>Time left</h2>
-        <p>{maturityStatus}</p>
-      </article>
-
-      <article className={styles.article}>
-        <h2>Availability</h2>
-        <p>{availability} tokens available to claim</p>
-      </article>
+      <TokensInfo
+        tokensClaimed={tokensClaimed}
+        availability={availability}
+        claimedTokens={claimedTokens}
+        maturityStatus={maturityStatus}
+        streamedTokens={streamedTokens}
+        claimableTokens={claimableTokens}
+        totalClaimableTokens={totalClaimableTokens}
+      />
     </section>
   );
 };
