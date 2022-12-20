@@ -1,0 +1,96 @@
+/* Resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+#root {
+  height: 100%;
+  isolation: isolate;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  color: var(--color-white);
+  background-color: var(--color-gray-9);
+}
+
+h1 {
+  font-size: var(--step-2);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+p {
+  font-size: var(--step-0);
+  font-weight: 500;
+}
+
+button {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+a[href],
+button {
+  display: inline-block;
+  height: 40px;
+  padding: 7px 15px 8px;
+  color: var(--color-white);
+  font-size: 1.125rem;
+  text-decoration: none;
+  background: var(--color-gray-8);
+  border-radius: 10px;
+}
+
+a[href]:hover,
+button:hover {
+  background: var(--color-primary);
+}

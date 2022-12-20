@@ -1,0 +1,23 @@
+:root {
+  /* Colors */
+  --color-white: #ffffff;
+  --color-primary: #ff4e17;
+  --color-gray-9: #212529;
+  --color-gray-8: #343a40;
+  --color-gray-7: #495057;
+  --color-gray-6: #868e96;
+
+  /* Typography */
+  --font-family: -apple-system, system-ui, sans-serif;
+  --font-family-monospace: Consolas, Menlo, Monaco, Andale Mono WT, Andale Mono,
+    Lucida Console, Lucida Sans Typewriter, DejaVu Sans Mono,
+    Bitstream Vera Sans Mono, Liberation Mono, Nimbus Mono L, Courier New,
+    Courier, monospace;
+
+  /* Fluid Type Scale */
+  --step--2: clamp(0.78rem, calc(0.77rem + 0.03vw), 0.8rem);
+  --step--1: clamp(0.94rem, calc(0.92rem + 0.11vw), 1rem);
+  --step-0: clamp(1.13rem, calc(1.08rem + 0.22vw), 1.25rem); /* p */
+  --step-1: clamp(1.35rem, calc(1.28rem + 0.37vw), 1.56rem); /* h2 */
+  --step-2: clamp(1.62rem, calc(1.5rem + 0.58vw), 1.95rem); /* h1 */
+}

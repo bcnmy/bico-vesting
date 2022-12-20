@@ -1,0 +1,7 @@
+.wrapper {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  width: min(90vw, 56rem);
+  margin: 0 auto;
+}

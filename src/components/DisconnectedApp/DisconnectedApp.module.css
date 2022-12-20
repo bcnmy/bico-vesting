@@ -1,0 +1,6 @@
+.slice {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 48px 0;
+}

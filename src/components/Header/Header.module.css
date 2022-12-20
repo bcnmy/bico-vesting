@@ -1,0 +1,31 @@
+.siteHeader {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--color-white);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+  float: left;
+}
+.nav-item {
+  display: inline-block;
+}
+.nav-item:last-child {
+  margin-right: 0;
+}
+.nav-item a[href]:not(:hover) {
+  text-decoration: none;
+}
+.nav-item-active {
+  font-weight: 700;
+  text-decoration: underline;
+}

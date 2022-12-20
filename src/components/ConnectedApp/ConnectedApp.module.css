@@ -1,0 +1,38 @@
+.slice {
+  height: 100%;
+  padding: 48px 0;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.article {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: var(--color-gray-8);
+  border-radius: 10px;
+}
+.article :where(h2, p) {
+  font-size: var(--step--1);
+}
+.article :where(p) {
+  font-family: var(--font-family-monospace);
+}
+
+/* Tablets */
+@media (max-width: 68.75rem) {
+  .sectionHeader {
+    grid-template-columns: 1fr;
+    grid-gap: 1.5rem;
+  }
+}
