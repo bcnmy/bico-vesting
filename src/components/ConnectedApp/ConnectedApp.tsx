@@ -10,6 +10,7 @@ import {
   useNetwork,
   usePrepareContractWrite,
   useSwitchNetwork,
+  useWaitForTransaction,
 } from 'wagmi';
 import bicoVestingABI from '../../abis/bico-vesting.abi.json';
 import { ProgressBar } from '../ProgressBar';
@@ -48,9 +49,24 @@ const ConnectedApp = () => {
   } = useContractWrite(config);
 
   const {
+    data: claimBicoTransaction,
+    isError: claimBicoTransactionError,
+    isLoading: claimBicoTransactionLoading,
+    isSuccess: claimBicoTransactionSuccess,
+  } = useWaitForTransaction({
+    hash: claimBicoData?.hash,
+    onSuccess: () => {
+      refetchClaimData();
+      refetchClaimableAmountData();
+      refetchClaimPausedData();
+    },
+  });
+
+  const {
     data: claimData,
     isError: claimDataError,
     isLoading: claimDataLoading,
+    refetch: refetchClaimData,
   } = useContractRead({
     address: BICO_VESTING_ADDRESS,
     abi: bicoVestingABI,
@@ -64,6 +80,7 @@ const ConnectedApp = () => {
     data: claimableAmountData,
     isError: claimableAmountDataError,
     isLoading: claimableAmountDataLoading,
+    refetch: refetchClaimableAmountData,
   } = useContractRead({
     address: BICO_VESTING_ADDRESS,
     abi: bicoVestingABI,
@@ -77,6 +94,7 @@ const ConnectedApp = () => {
     data: claimPausedData,
     isError: claimPausedDataError,
     isLoading: claimPausedDataLoading,
+    refetch: refetchClaimPausedData,
   } = useContractRead({
     address: BICO_VESTING_ADDRESS,
     abi: bicoVestingABI,
@@ -133,6 +151,8 @@ const ConnectedApp = () => {
   const isClaimTokensDisabled =
     claimPaused || totalAmount === amountClaimed || !claim.isActive;
 
+  console.log({ totalAmount, amountClaimed, totalClaimableAmount });
+
   return (
     <section className={styles.slice}>
       <header className={styles.sectionHeader}>
@@ -142,9 +162,9 @@ const ConnectedApp = () => {
             disabled={isClaimTokensDisabled || !write}
             onClick={() => write?.()}
           >
-            {claimBicoLoading
+            {claimBicoTransactionLoading
               ? 'Claiming...'
-              : claimBicoSuccess
+              : claimBicoTransactionSuccess
               ? 'Claimed'
               : 'Claim Bico'}
           </button>
@@ -170,7 +190,7 @@ const ConnectedApp = () => {
         <h2>Claimed</h2>
         <ProgressBar value={claimedTokens} aria-label="Claimed tokens" />
         <p>
-          {claimedTokens.toLocaleString()} /{' '}
+          {amountClaimed.toLocaleString()} /{' '}
           {totalClaimableAmount.toLocaleString()} tokens claimed
         </p>
       </article>
