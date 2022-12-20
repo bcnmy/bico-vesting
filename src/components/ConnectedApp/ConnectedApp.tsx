@@ -98,7 +98,7 @@ const ConnectedApp = () => {
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         setToastInfo({
-          title: 'Transaction sent',
+          title: 'Transaction sent 👍',
           description: 'Please wait for the transaction to be approved.',
         });
         setOpen(true);
@@ -109,7 +109,7 @@ const ConnectedApp = () => {
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         setToastInfo({
-          title: 'Failed to send transaction',
+          title: 'Failed to send transaction 🙁',
           description:
             'We were unable to send the transaction. Please try again later.',
         });
@@ -126,7 +126,7 @@ const ConnectedApp = () => {
         window.clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setToastInfo({
-            title: 'Tokens claimed',
+            title: 'Tokens claimed 🎉',
             description: 'You have successfully claimed your tokens.',
           });
           setOpen(true);
@@ -137,7 +137,7 @@ const ConnectedApp = () => {
         window.clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setToastInfo({
-            title: 'Failed to claim tokens',
+            title: 'Failed to claim tokens 😢',
             description:
               'We were unable to claim your tokens. Please try again later.',
           });
