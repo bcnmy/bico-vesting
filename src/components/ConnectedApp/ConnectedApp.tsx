@@ -3,8 +3,6 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { BigNumber } from 'ethers';
 import React from 'react';
 import {
-  goerli,
-  mainnet,
   useAccount,
   useContractReads,
   useContractWrite,
@@ -16,6 +14,7 @@ import {
 import vestingABI from '../../abis/vesting.abi.json';
 import { formatBigNumber } from '../../utils/formatBigNumber';
 import { Claim, formatClaim } from '../../utils/formatClaim';
+import { ProgressBar } from '../ProgressBar';
 import {
   ToastClose,
   ToastDescription,
@@ -25,11 +24,13 @@ import {
   ToastViewport,
 } from '../Toast';
 import toastStyles from '../Toast/Toast.module.css';
-import { TokensInfo } from '../TokensInfo';
 import styles from './ConnectedApp.module.css';
 dayjs.extend(relativeTime);
 
-const VESTING_ADDRESS = '0x483C9102a938D3d1f0bc4dc73bea831A2048D55b';
+const VESTING_ADDRESS =
+  import.meta.env.MODE === 'production'
+    ? '0xeE3593817fB142BFBEA560fcF47b3f354f519D33'
+    : '0x483C9102a938D3d1f0bc4dc73bea831A2048D55b';
 
 const vestingContract = {
   address: VESTING_ADDRESS,
@@ -44,10 +45,8 @@ const ConnectedApp = () => {
   });
   const timerRef = React.useRef(0);
   const { address } = useAccount();
-  const { chain } = useNetwork();
+  const { chain, chains } = useNetwork();
   const { isLoading: switchNetworkLoading, switchNetwork } = useSwitchNetwork();
-  // TODO: Use mainnet for prod and goerli for dev.
-  const supportedChainIds = [goerli.id, mainnet.id];
 
   React.useEffect(() => {
     return () => clearTimeout(timerRef.current);
@@ -181,8 +180,8 @@ const ConnectedApp = () => {
   const totalClaimableTokens = vestAmount + unlockAmount;
 
   // Generated tokens, claimed tokens and availability
-  const streamedTokens = (claimableTokens / totalClaimableTokens) * 100;
-  const claimedTokens = (tokensClaimed / claimableTokens) * 100;
+  const streamedTokens = (claimableTokens / totalClaimableTokens) * 100 || 0;
+  const claimedTokens = (tokensClaimed / claimableTokens) * 100 || 0;
   const availability = (claimableTokens - tokensClaimed).toLocaleString();
 
   // Maturity status
@@ -210,7 +209,7 @@ const ConnectedApp = () => {
       <ToastProvider swipeDirection="right">
         <header className={styles.sectionHeader}>
           <h1>Claim Tokens</h1>
-          {chain && supportedChainIds.includes(chain.id) ? (
+          {chain && chains.find((chainObj) => chainObj.id === chain.id) ? (
             <button
               className={styles.claimTokensBtn}
               disabled={areClaimsDisabled || claimTokensLoading || !write}
@@ -223,24 +222,46 @@ const ConnectedApp = () => {
                 : 'Claim Bico'}
             </button>
           ) : (
+            //  Since we only have a single chain, we can use the first one.
             <button
               disabled={!switchNetwork}
-              onClick={() => switchNetwork?.(mainnet.id)}
+              onClick={() => switchNetwork?.(chains[0].id)}
             >
-              {switchNetworkLoading ? 'Switching...' : 'Switch to Ethereum'}
+              {switchNetworkLoading
+                ? `Switching to ${chains[0].name}...}`
+                : `Switch to ${chains[0].name}`}
             </button>
           )}
         </header>
 
-        <TokensInfo
-          tokensClaimed={tokensClaimed}
-          availability={availability}
-          claimedTokens={claimedTokens}
-          maturityStatus={maturityStatus}
-          streamedTokens={streamedTokens}
-          claimableTokens={claimableTokens}
-          totalClaimableTokens={totalClaimableTokens}
-        />
+        {/* Vesting information */}
+        <article className={styles.article}>
+          <h2>Streamed</h2>
+          <ProgressBar value={streamedTokens} aria-label="Streamed tokens" />
+          <p>
+            {claimableTokens.toLocaleString()} /{' '}
+            {totalClaimableTokens.toLocaleString()} total tokens
+          </p>
+        </article>
+
+        <article className={styles.article}>
+          <h2>Claimed</h2>
+          <ProgressBar value={claimedTokens} aria-label="Claimed tokens" />
+          <p>
+            {tokensClaimed.toLocaleString()} /{' '}
+            {claimableTokens.toLocaleString()} tokens claimed
+          </p>
+        </article>
+
+        <article className={styles.article}>
+          <h2>Time left</h2>
+          <p>{maturityStatus}</p>
+        </article>
+
+        <article className={styles.article}>
+          <h2>Availability</h2>
+          <p>{availability} tokens available to claim</p>
+        </article>
 
         {/* Toast */}
         <ToastRoot

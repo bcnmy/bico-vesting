@@ -16,6 +16,23 @@
   background-color: var(--color-primary);
 }
 
+.article {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: var(--color-gray-8);
+  border-radius: 10px;
+}
+.article :where(h2, p) {
+  font-size: var(--step--1);
+}
+.article :where(p) {
+  font-family: var(--font-family-monospace);
+}
+
 /* Tablets */
 @media (max-width: 68.75rem) {
   .sectionHeader {

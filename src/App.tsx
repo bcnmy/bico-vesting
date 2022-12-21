@@ -21,7 +21,7 @@ if (!import.meta.env.VITE_WALLET_CONNECT_ID) {
 const projectId = import.meta.env.VITE_WALLET_CONNECT_ID;
 
 // 2. Configure wagmi client
-const chains = [mainnet, goerli];
+const chains = import.meta.env.MODE === 'production' ? [mainnet] : [goerli];
 const { provider } = configureChains(chains, [
   walletConnectProvider({ projectId }),
 ]);
