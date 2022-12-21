@@ -103,14 +103,13 @@ const ConnectedApp = () => {
         setOpen(true);
       }, 100);
     },
-    onError: () => {
+    onError: (error) => {
       setOpen(false);
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         setToastInfo({
           title: 'Failed to send transaction 🙁',
-          description:
-            'We were unable to send the transaction. Please try again later.',
+          description: `We were unable to send the transaction. Reason: ${error.message}.`,
         });
         setOpen(true);
       }, 100);
@@ -131,14 +130,13 @@ const ConnectedApp = () => {
           setOpen(true);
         }, 100);
       },
-      onError: () => {
+      onError: (error) => {
         setOpen(false);
         window.clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setToastInfo({
             title: 'Failed to claim tokens 😢',
-            description:
-              'We were unable to claim your tokens. Please try again later.',
+            description: `We were unable to claim your tokens. Reason: ${error.message}.`,
           });
           setOpen(true);
         }, 100);
