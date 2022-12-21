@@ -104,12 +104,17 @@ const ConnectedApp = () => {
       }, 100);
     },
     onError: (error) => {
+      const errorDescription =
+        error.name === 'UserRejectedRequestError'
+          ? 'Transaction rejected by user'
+          : 'We were unable to send the transaction. Please try again later.';
+
       setOpen(false);
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         setToastInfo({
           title: 'Failed to send transaction 🙁',
-          description: `We were unable to send the transaction. Reason: ${error.message}.`,
+          description: errorDescription,
         });
         setOpen(true);
       }, 100);
@@ -130,13 +135,13 @@ const ConnectedApp = () => {
           setOpen(true);
         }, 100);
       },
-      onError: (error) => {
+      onError: () => {
         setOpen(false);
         window.clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
           setToastInfo({
             title: 'Failed to claim tokens 😢',
-            description: `We were unable to claim your tokens. Reason: ${error.message}.`,
+            description: `We were unable to claim your tokens. Please try again later.`,
           });
           setOpen(true);
         }, 100);
