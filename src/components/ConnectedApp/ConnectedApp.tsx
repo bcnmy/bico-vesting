@@ -228,7 +228,7 @@ const ConnectedApp = () => {
               onClick={() => switchNetwork?.(chains[0].id)}
             >
               {switchNetworkLoading
-                ? `Switching to ${chains[0].name}...}`
+                ? `Switching to ${chains[0].name}...`
                 : `Switch to ${chains[0].name}`}
             </button>
           )}
