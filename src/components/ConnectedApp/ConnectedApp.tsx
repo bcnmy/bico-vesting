@@ -63,18 +63,15 @@ const ConnectedApp = () => {
         ...vestingContract,
         functionName: 'getClaim',
         args: [address],
-        chainId: 5,
       },
       {
         ...vestingContract,
         functionName: 'claimableAmount',
         args: [address],
-        chainId: 5,
       },
       {
         ...vestingContract,
         functionName: 'paused',
-        chainId: 5,
       },
     ],
   });
@@ -149,7 +146,7 @@ const ConnectedApp = () => {
   if (isLoading) {
     return (
       <section className={styles.slice}>
-        <p>Loading...</p>;
+        <p>Loading...</p>
       </section>
     );
   }
@@ -158,7 +155,7 @@ const ConnectedApp = () => {
   if (isError) {
     return (
       <section className={styles.slice}>
-        <p>We were unable to fetch the claims data. Please try again later.</p>;
+        <p>We were unable to fetch the claims data. Please try again later.</p>
       </section>
     );
   }
