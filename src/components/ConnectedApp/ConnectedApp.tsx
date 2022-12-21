@@ -63,18 +63,15 @@ const ConnectedApp = () => {
         ...vestingContract,
         functionName: 'getClaim',
         args: [address],
-        chainId: 5,
       },
       {
         ...vestingContract,
         functionName: 'claimableAmount',
         args: [address],
-        chainId: 5,
       },
       {
         ...vestingContract,
         functionName: 'paused',
-        chainId: 5,
       },
     ],
   });
