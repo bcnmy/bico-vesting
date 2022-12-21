@@ -149,7 +149,7 @@ const ConnectedApp = () => {
   if (isLoading) {
     return (
       <section className={styles.slice}>
-        <p>Loading...</p>;
+        <p>Loading...</p>
       </section>
     );
   }
@@ -158,7 +158,7 @@ const ConnectedApp = () => {
   if (isError) {
     return (
       <section className={styles.slice}>
-        <p>We were unable to fetch the claims data. Please try again later.</p>;
+        <p>We were unable to fetch the claims data. Please try again later.</p>
       </section>
     );
   }
