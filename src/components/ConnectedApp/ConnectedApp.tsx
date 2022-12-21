@@ -104,11 +104,13 @@ const ConnectedApp = () => {
       }, 100);
     },
     onError: (error) => {
+      // Log the error
+      console.error(error);
+
       const errorDescription =
         error.name === 'UserRejectedRequestError'
           ? 'Transaction rejected by user'
           : 'We were unable to send the transaction. Please try again later.';
-
       setOpen(false);
       window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
@@ -135,7 +137,10 @@ const ConnectedApp = () => {
           setOpen(true);
         }, 100);
       },
-      onError: () => {
+      onError: (error) => {
+        // Log the error
+        console.error(error);
+
         setOpen(false);
         window.clearTimeout(timerRef.current);
         timerRef.current = window.setTimeout(() => {
@@ -183,9 +188,10 @@ const ConnectedApp = () => {
   const totalClaimableTokens = vestAmount + unlockAmount;
 
   // Generated tokens, claimed tokens and availability
-  const streamedTokens = (claimableTokens / totalClaimableTokens) * 100 || 0;
-  const claimedTokens = (tokensClaimed / claimableTokens) * 100 || 0;
-  const availability = (claimableTokens - tokensClaimed).toLocaleString();
+  const streamed = (claimableTokens / totalClaimableTokens) * 100 || 0;
+  const claimed = (tokensClaimed / claimableTokens) * 100 || 0;
+  let availability = claimableTokens - tokensClaimed;
+  availability = availability <= 0.001 ? 0 : availability;
 
   // Maturity status
   let maturityStatus = `${dayjs(maturityDate).fromNow(true)} till maturity`;
@@ -203,9 +209,10 @@ const ConnectedApp = () => {
   // Is claim exhausted?
   const areClaimsDisabled =
     paused ||
+    !claim.isActive ||
+    availability === 0 ||
     tokensClaimed >= totalClaimableTokens ||
-    tokensClaimed >= claimableTokens ||
-    !claim.isActive;
+    tokensClaimed >= claimableTokens;
 
   return (
     <section className={styles.slice}>
@@ -240,7 +247,7 @@ const ConnectedApp = () => {
         {/* Vesting information */}
         <article className={styles.article}>
           <h2>Streamed</h2>
-          <ProgressBar value={streamedTokens} aria-label="Streamed tokens" />
+          <ProgressBar value={streamed} aria-label="Streamed tokens" />
           <p>
             {claimableTokens.toLocaleString()} /{' '}
             {totalClaimableTokens.toLocaleString()} total tokens
@@ -249,7 +256,7 @@ const ConnectedApp = () => {
 
         <article className={styles.article}>
           <h2>Claimed</h2>
-          <ProgressBar value={claimedTokens} aria-label="Claimed tokens" />
+          <ProgressBar value={claimed} aria-label="Claimed tokens" />
           <p>
             {tokensClaimed.toLocaleString()} /{' '}
             {claimableTokens.toLocaleString()} tokens claimed
@@ -263,7 +270,7 @@ const ConnectedApp = () => {
 
         <article className={styles.article}>
           <h2>Availability</h2>
-          <p>{availability} tokens available to claim</p>
+          <p>{availability.toLocaleString()} tokens available to claim</p>
         </article>
 
         {/* Toast */}
