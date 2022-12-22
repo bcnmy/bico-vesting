@@ -36,7 +36,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync build s3://${{ secrets.S3_PROD_BUCKET_NAME }}
+          aws s3 sync dist s3://${{ secrets.S3_PROD_BUCKET_NAME }}
           aws cloudfront create-invalidation --distribution-id ${{ secrets.S3_PROD_CF_ID }} --paths /
 
 
