@@ -37,6 +37,8 @@ const vestingContract = {
   abi: vestingABI,
 };
 
+const GAS_LIMIT = BigNumber.from(100000);
+
 const ConnectedApp = () => {
   const [open, setOpen] = React.useState(false);
   const [toastInfo, setToastInfo] = React.useState({
@@ -85,6 +87,9 @@ const ConnectedApp = () => {
     address: VESTING_ADDRESS,
     abi: vestingABI,
     functionName: 'claim',
+    overrides: {
+      gasLimit: GAS_LIMIT,
+    },
   });
   const {
     data: claimTokens,
