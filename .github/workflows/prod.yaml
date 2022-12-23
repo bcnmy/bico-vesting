@@ -26,7 +26,7 @@ jobs:
         env:
           CI: false
           NODE_OPTIONS: --max_old_space_size=4096
-          VITE_WALLET_CONNECT_ID: ${{ secrets.VITE_WALLET_CONNECT_ID }}
+          VITE_PROD_WALLET_CONNECT_ID: ${{ secrets.VITE_PROD_WALLET_CONNECT_ID }}
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
