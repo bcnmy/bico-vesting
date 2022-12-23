@@ -13,14 +13,19 @@ import { Layout } from './components/Layout';
 import './styles/design_tokens.css';
 import './styles/globals.css';
 
-// 1. Get projectID at https://cloud.walletconnect.com
-if (!import.meta.env.VITE_WALLET_CONNECT_ID) {
-  throw new Error('You need to provide VITE_WALLET_CONNECT_ID env variable');
+// Get projectID at https://cloud.walletconnect.com
+const WALLET_CONNECT_ID =
+  import.meta.env.MODE === 'production'
+    ? import.meta.env.VITE_PROD_WALLET_CONNECT_ID
+    : import.meta.env.VITE_STAGING_WALLET_CONNECT_ID;
+
+if (!WALLET_CONNECT_ID) {
+  throw new Error('You need to provide WALLET_CONNECT_ID env variable');
 }
 
-const projectId = import.meta.env.VITE_WALLET_CONNECT_ID;
+const projectId = WALLET_CONNECT_ID;
 
-// 2. Configure wagmi client
+// Configure wagmi client
 const chains = import.meta.env.MODE === 'production' ? [mainnet] : [goerli];
 const { provider } = configureChains(chains, [
   walletConnectProvider({ projectId }),
@@ -31,10 +36,10 @@ const wagmiClient = createClient({
   provider,
 });
 
-// 3. Configure modal ethereum client
+// Configure modal ethereum client
 export const ethereumClient = new EthereumClient(wagmiClient, chains);
 
-// 4. Wrap your app with WagmiProvider and add <Web3Modal /> compoennt
+// Wrap the app with WagmiProvider and add <Web3Modal /> compoennt
 export default function App() {
   const { isConnected } = useAccount();
   const [ready, setReady] = useState(false);
