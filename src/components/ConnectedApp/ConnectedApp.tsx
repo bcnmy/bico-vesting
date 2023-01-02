@@ -12,6 +12,8 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 import vestingABI from '../../abis/vesting.abi.json';
+import { useClaimGas } from '../../hooks/useClaimGas';
+import { vestingContract, VESTING_ADDRESS } from '../../lib/constants';
 import { formatBigNumber } from '../../utils/formatBigNumber';
 import { Claim, formatClaim } from '../../utils/formatClaim';
 import { ProgressBar } from '../ProgressBar';
@@ -25,19 +27,8 @@ import {
 } from '../Toast';
 import toastStyles from '../Toast/Toast.module.css';
 import styles from './ConnectedApp.module.css';
+
 dayjs.extend(relativeTime);
-
-const VESTING_ADDRESS =
-  import.meta.env.MODE === 'production'
-    ? '0xeE3593817fB142BFBEA560fcF47b3f354f519D33'
-    : '0x483C9102a938D3d1f0bc4dc73bea831A2048D55b';
-
-const vestingContract = {
-  address: VESTING_ADDRESS,
-  abi: vestingABI,
-};
-
-const GAS_LIMIT = BigNumber.from(100000);
 
 const ConnectedApp = () => {
   const [open, setOpen] = React.useState(false);
@@ -49,6 +40,7 @@ const ConnectedApp = () => {
   const { address } = useAccount();
   const { chain, chains } = useNetwork();
   const { isLoading: switchNetworkLoading, switchNetwork } = useSwitchNetwork();
+  const claimGasLimit = useClaimGas();
 
   React.useEffect(() => {
     return () => clearTimeout(timerRef.current);
@@ -88,8 +80,9 @@ const ConnectedApp = () => {
     abi: vestingABI,
     functionName: 'claim',
     overrides: {
-      gasLimit: GAS_LIMIT,
+      gasLimit: claimGasLimit,
     },
+    enabled: !!claimGasLimit,
   });
   const {
     data: claimTokens,
