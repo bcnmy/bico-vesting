@@ -4,7 +4,7 @@ The [investor dashboard](https://investor.biconomy.io/) allows investors to clai
 
 ## Getting started
 
-This UI interacts with the vesting smart contract (see [mainnet](https://etherscan.io/address/0xeE3593817fB142BFBEA560fcF47b3f354f519D33) and [testnet](https://goerli.etherscan.io/address/0x483C9102a938D3d1f0bc4dc73bea831A2048D55b) and allows investors to claim their BICO tokens.
+This UI interacts with the vesting smart contract (see [mainnet](https://etherscan.io/address/0xeE3593817fB142BFBEA560fcF47b3f354f519D33) and [testnet](https://goerli.etherscan.io/address/0x483C9102a938D3d1f0bc4dc73bea831A2048D55b)) and allows investors to claim their BICO tokens. The UI uses [Web3Modal](https://web3modal.com) and [Wagmi](https://wagmi.sh) for interacting with wallets and the vesting smart contract.
 
 ### Issues
 
