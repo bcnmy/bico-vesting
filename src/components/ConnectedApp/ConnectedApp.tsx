@@ -72,8 +72,9 @@ const ConnectedApp = () => {
       },
     ],
   });
-  const data = vestingData as [Claim, BigNumber, boolean];
-  const [claim, claimableAmount, paused] = data ?? [];
+  const claim = vestingData?.[0].result as unknown as Claim;
+  const claimableAmount = vestingData?.[1].result as unknown as BigNumber;
+  const paused = vestingData?.[2].result as unknown as boolean;
 
   const { config } = usePrepareContractWrite({
     address: VESTING_ADDRESS,
@@ -173,13 +174,15 @@ const ConnectedApp = () => {
   const {
     vestAmount,
     unlockAmount,
-    endTime,
+    unlockTime,
     amountClaimed: tokensClaimed,
   } = formatClaim(claim);
 
   // Current and matury dates
   const currentDate = Math.round(Date.now() / 1000);
-  const maturityDate = new Date(Number.parseFloat(endTime.toString()) * 1000);
+  const maturityDate = new Date(
+    Number.parseFloat(unlockTime.toString()) * 1000
+  );
 
   // Claimable and total claimable tokens
   const claimableTokens = formatBigNumber(claimableAmount) + tokensClaimed;
