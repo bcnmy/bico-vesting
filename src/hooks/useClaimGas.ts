@@ -9,19 +9,17 @@ export const useClaimGas = () => {
   const { address } = useAccount();
   const account = address as unknown as Account;
   const client = usePublicClient();
-  const contract = useContractWrite({
-    ...vestingContract,
-  });
   const [claimGasLimit, setClaimGasLimit] = React.useState<BigNumber>();
 
   React.useEffect(() => {
     async function getEstimate() {
-      if (!contract || !signer) return;
+      if (!signer) return;
       let gasLimit = BigInt(0);
       gasLimit = await client.estimateContractGas({
         ...vestingContract,
         functionName: 'claim',
-        account
+        account,
+        args: [],
       })
 
       // const gasLimit = await contract.estimateGas.claim();
@@ -30,7 +28,7 @@ export const useClaimGas = () => {
     }
 
     getEstimate();
-  }, [contract, signer]);
+  }, [signer]);
 
   return claimGasLimit;
 };
