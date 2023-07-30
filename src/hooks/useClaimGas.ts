@@ -1,22 +1,32 @@
 import { BigNumber } from 'ethers';
 import React from 'react';
-import { useContract, useSigner } from 'wagmi';
+import { useAccount, useContractWrite, usePublicClient, useWalletClient } from 'wagmi';
 import { vestingContract } from '../lib/constants';
+import { Account } from 'viem';
 
 export const useClaimGas = () => {
-  const { data: signer } = useSigner();
-  const contract = useContract({
+  const { data: signer } = useWalletClient();
+  const { address } = useAccount();
+  const account = address as unknown as Account;
+  const client = usePublicClient();
+  const contract = useContractWrite({
     ...vestingContract,
-    signerOrProvider: signer,
   });
   const [claimGasLimit, setClaimGasLimit] = React.useState<BigNumber>();
 
   React.useEffect(() => {
     async function getEstimate() {
       if (!contract || !signer) return;
-      const gasLimit = await contract.estimateGas.claim();
+      let gasLimit = BigInt(0);
+      gasLimit = await client.estimateContractGas({
+        ...vestingContract,
+        functionName: 'claim',
+        account
+      })
+
+      // const gasLimit = await contract.estimateGas.claim();
       // Add 25k extra gas to be well within the limit
-      setClaimGasLimit(gasLimit.add(BigNumber.from(25000)));
+      setClaimGasLimit(BigNumber.from(BigInt(25000) + gasLimit));
     }
 
     getEstimate();
