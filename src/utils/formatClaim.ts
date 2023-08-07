@@ -16,7 +16,7 @@ const formatClaim = (claim: Claim) => {
     ...claim,
     vestAmount: formatBigNumber(claim.vestAmount),
     unlockAmount: formatBigNumber(claim.unlockAmount),
-    unlockTime: formatBigNumber(claim.unlockTime),
+    unlockTime: claim.unlockTime,
     amountClaimed: formatBigNumber(claim.amountClaimed),
   };
 };
