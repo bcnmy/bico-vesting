@@ -174,14 +174,14 @@ const ConnectedApp = () => {
   const {
     vestAmount,
     unlockAmount,
-    unlockTime,
+    endTime,
     amountClaimed: tokensClaimed,
   } = formatClaim(claim);
 
   // Current and matury dates
   const currentDate = Math.round(Date.now() / 1000);
   const maturityDate = new Date(
-    Number.parseFloat(unlockTime.toString()) * 1000
+    Number.parseFloat(endTime.toString()) * 1000
   );
 
   // Claimable and total claimable tokens
